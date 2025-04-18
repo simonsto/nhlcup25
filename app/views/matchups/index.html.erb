@@ -1,55 +1,161 @@
-<h1>Predict the 2025 NHL Playoff Bracket</h1>
+<h1 style="text-align: center; margin-bottom: 30px;">Stanley Cup Playoff Bracket</h1>
 
-<% @matchups_by_round.each do |round, matchups| %>
-  <h2 style="margin-top: 40px;">Round <%= round %></h2>
+<div class="bracket" data-controller="bracket" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;">
 
-  <div class="bracket-round" style="display: flex; flex-wrap: wrap; gap: 20px;">
-    <% matchups.each do |matchup| %>
-      <% prediction = current_user.predictions.find_by(matchup_id: matchup.id) %>
-
-      <div class="matchup-box" style="border: 1px solid #ddd; padding: 15px; width: 300px;">
-        <h4>
-          <%= matchup.team_a.name %> vs <%= matchup.team_b.name %>
-        </h4>
-
-        <% if prediction.present? %>
-          <p style="color: green;">
-            ✅ You predicted: <strong><%= prediction.predicted_winner.name %></strong> in <%= prediction.games_in_series %> games
-          </p>
-        <% else %>
-          <p style="color: gray;">No prediction yet</p>
+  <!-- WEST: First Round -->
+  <div class="column">
+    <h3>First Round (West)</h3>
+    <% @matchups_by_round[1]&.select { |m| m.team_a.conference == "West" }.each do |matchup| %>
+      <div class="matchup-pair" data-matchup-id="<%= matchup.id %>">
+        <% if matchup.label.present? %>
+          <div class="matchup-label" style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">
+            <%= matchup.label %>
+          </div>
         <% end %>
-
-        <%= form_with url: predictions_path, method: :post, local: true do %>
-          <!-- Required to tell Rails which matchup this is for -->
-          <%= hidden_field_tag :matchup_id, matchup.id %>
-
-          <!-- Team selection dropdown -->
-          <div>
-            <%= label_tag :predicted_winner_id, "Pick a winner" %><br>
-            <%= select_tag :predicted_winner_id,
-              options_for_select([
-                [matchup.team_a.name, matchup.team_a.id],
-                [matchup.team_b.name, matchup.team_b.id]
-              ], selected: prediction&.predicted_winner_id)
-            %>
+        <% [matchup.team_a, matchup.team_b].each do |team| %>
+          <div class="team-box"
+               draggable="true"
+               data-action="dragstart->bracket#dragStart"
+               data-team-id="<%= team.id %>"
+               data-matchup-id="<%= matchup.id %>"
+               data-team-name="<%= team.name %>"
+               data-logo-filename="<%= team.logo_filename %>">
+            <%= image_tag "teams/#{team.logo_filename}", height: 30 if team.logo_filename.present? %><br>
+            <%= team.name %>
           </div>
-
-          <!-- Games in series -->
-          <div>
-            <%= label_tag :games_in_series, "How many games?" %><br>
-            <%= number_field_tag :games_in_series,
-              prediction&.games_in_series || 6,
-              in: 4..7
-            %>
-          </div>
-
-          <!-- Submit button -->
-          <div style="margin-top: 10px;">
-            <%= submit_tag prediction.present? ? "Update Prediction" : "Save Prediction" %>
-          </div>
+        <% end %>
+        <% if (prediction = @user_predictions_by_matchup_id[matchup.id]) %>
+          <p style="font-size: 12px; color: green; margin-top: 4px;">
+            ✅ You picked <strong><%= prediction.predicted_winner.name %></strong> in <%= prediction.games_in_series %> games
+          </p>
         <% end %>
       </div>
     <% end %>
   </div>
-<% end %>
+
+  <!-- WEST: Second Round -->
+  <div class="column" data-bracket-target="round">
+    <h3>Second Round (West)</h3>
+    <% 4.times do %>
+      <div class="drop-slot"
+           data-action="dragover->bracket#dragOver drop->bracket#drop"
+           style="border: 2px dashed #bcd; min-height: 70px; background-color: #eef2f7; margin: 90px 0;">
+      </div>
+    <% end %>
+  </div>
+
+  <!-- WEST: Conference Final -->
+  <div class="column" data-bracket-target="round">
+    <h3>Conference Final (East)</h3>
+
+    <!-- Top box -->
+    <div class="drop-slot"
+        data-action="dragover->bracket#dragOver drop->bracket#drop"
+        style="border: 2px dashed #bcd;
+                min-height: 70px;
+                background-color: #eef2f7;
+                margin: 170px 0 80px;">
+    </div>
+
+    <!-- Bottom box (moved further down with more bottom margin) -->
+    <div class="drop-slot"
+        data-action="dragover->bracket#dragOver drop->bracket#drop"
+        style="border: 2px dashed #bcd;
+                min-height: 70px;
+                background-color: #eef2f7;
+                margin: 260px 0 240px;">
+    </div>
+  </div>
+
+  <!-- Stanley Cup Final -->
+<div class="column" data-bracket-target="round">
+    <h3>Stanley Cup Final</h3>
+
+    <!-- Champion Box (moved to top) -->
+    <div class="drop-slot"
+        data-action="dragover->bracket#dragOver drop->bracket#drop"
+        style="border: 2px dashed #3bcb4d; min-height: 70px; background-color: #3bcb4d; color: white; font-weight: bold; text-align: center; padding-top: 10px; margin-bottom: 30px;">
+      CHAMPION
+    </div>
+
+   <!-- Two Finalists -->
+<div style="display: flex; justify-content: center; gap: 2rem; margin: 250px 0 200px;">
+  <% 2.times do %>
+    <div class="drop-slot"
+         data-action="dragover->bracket#dragOver drop->bracket#drop"
+         style="border: 2px dashed #bcd;
+                min-height: 70px;
+                background-color: #eef2f7;
+                width: 200px;">
+    </div>
+  <% end %>
+</div>
+
+</div>
+
+
+  <!-- EAST: Conference Final -->
+  <div class="column" data-bracket-target="round">
+    <h3>Conference Final (East)</h3>
+
+    <!-- Top box -->
+    <div class="drop-slot"
+        data-action="dragover->bracket#dragOver drop->bracket#drop"
+        style="border: 2px dashed #bcd;
+                min-height: 70px;
+                background-color: #eef2f7;
+                margin: 170px 0 80px;">
+    </div>
+
+    <!-- Bottom box (moved further down with more bottom margin) -->
+    <div class="drop-slot"
+        data-action="dragover->bracket#dragOver drop->bracket#drop"
+        style="border: 2px dashed #bcd;
+                min-height: 70px;
+                background-color: #eef2f7;
+                margin: 265px 0 240px;">
+    </div>
+  </div>
+
+  <!-- EAST: Second Round -->
+  <div class="column" data-bracket-target="round">
+    <h3>Second Round (East)</h3>
+    <% 4.times do %>
+      <div class="drop-slot"
+           data-action="dragover->bracket#dragOver drop->bracket#drop"
+           style="border: 2px dashed #bcd; min-height: 70px; background-color: #eef2f7; margin: 90px 0;">
+      </div>
+    <% end %>
+  </div>
+
+  <!-- EAST: First Round -->
+  <div class="column">
+    <h3>First Round (East)</h3>
+    <% @matchups_by_round[1]&.select { |m| m.team_a.conference == "East" }.each do |matchup| %>
+      <div class="matchup-pair" data-matchup-id="<%= matchup.id %>">
+        <% if matchup.label.present? %>
+          <div class="matchup-label" style="font-size: 12px; font-weight: bold; margin-bottom: 4px;">
+            <%= matchup.label %>
+          </div>
+        <% end %>
+        <% [matchup.team_a, matchup.team_b].each do |team| %>
+          <div class="team-box"
+               draggable="true"
+               data-action="dragstart->bracket#dragStart"
+               data-team-id="<%= team.id %>"
+               data-matchup-id="<%= matchup.id %>"
+               data-team-name="<%= team.name %>"
+               data-logo-filename="<%= team.logo_filename %>">
+            <%= image_tag "teams/#{team.logo_filename}", height: 30 if team.logo_filename.present? %><br>
+            <%= team.name %>
+          </div>
+        <% end %>
+        <% if (prediction = @user_predictions_by_matchup_id[matchup.id]) %>
+          <p style="font-size: 12px; color: green; margin-top: 4px;">
+            ✅ You picked <strong><%= prediction.predicted_winner.name %></strong> in <%= prediction.games_in_series %> games
+          </p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

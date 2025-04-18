@@ -8,3 +8,48 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+ .bracket {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 15px;
+  padding: 20px;
+}
+
+.column {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px;
+  min-height: 500px;
+  text-align: center;
+  min-width: 200px;
+}
+
+.matchup-pair {
+  background: #fff;
+  border: 2px solid #ccc;
+  margin: 15px 0;
+  padding: 5px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.team-box {
+  padding: 5px;
+  border-top: 1px solid #eee;
+}
+
+.team-box:first-child {
+  border-top: none;
+}
+
+.drop-slot {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.drop-slot:hover {
+  background-color: #eef5ff;
+  background: #e3f3ff;
+}
+
