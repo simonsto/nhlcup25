@@ -1,0 +1,40 @@
+<h1>Create a Group</h1>
+
+<%= form_with model: @user_group, url: user_groups_path, local: true do |f| %>
+  <div>
+    <%= f.label :name, "Group Name" %><br>
+    <%= f.text_field :name, required: true %>
+  </div>
+
+  <br>
+
+  <div>
+    <%= f.label :is_private, "Private Group?" %><br>
+    <%= f.check_box :is_private %>
+    <p><small>Private groups require an invite code to join.</small></p>
+  </div>
+
+  <div id="invite-code-field" style="display:none;">
+    <%= f.label :invite_code, "Custom Invite Code (optional)" %><br>
+    <%= f.text_field :invite_code %>
+    <p><small>If left blank, one will be generated automatically.</small></p>
+  </div>
+
+  <br>
+
+  <%= f.submit "Create Group" %>
+<% end %>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const checkbox = document.querySelector("#user_group_is_private");
+    const inviteField = document.querySelector("#invite-code-field");
+
+    const toggleInvite = () => {
+      inviteField.style.display = checkbox.checked ? "block" : "none";
+    };
+
+    checkbox.addEventListener("change", toggleInvite);
+    toggleInvite(); // Initial run
+  });
+</script>

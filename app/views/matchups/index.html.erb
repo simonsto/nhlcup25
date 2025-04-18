@@ -1,0 +1,55 @@
+<h1>Predict the 2025 NHL Playoff Bracket</h1>
+
+<% @matchups_by_round.each do |round, matchups| %>
+  <h2 style="margin-top: 40px;">Round <%= round %></h2>
+
+  <div class="bracket-round" style="display: flex; flex-wrap: wrap; gap: 20px;">
+    <% matchups.each do |matchup| %>
+      <% prediction = current_user.predictions.find_by(matchup_id: matchup.id) %>
+
+      <div class="matchup-box" style="border: 1px solid #ddd; padding: 15px; width: 300px;">
+        <h4>
+          <%= matchup.team_a.name %> vs <%= matchup.team_b.name %>
+        </h4>
+
+        <% if prediction.present? %>
+          <p style="color: green;">
+            ✅ You predicted: <strong><%= prediction.predicted_winner.name %></strong> in <%= prediction.games_in_series %> games
+          </p>
+        <% else %>
+          <p style="color: gray;">No prediction yet</p>
+        <% end %>
+
+        <%= form_with url: predictions_path, method: :post, local: true do %>
+          <!-- Required to tell Rails which matchup this is for -->
+          <%= hidden_field_tag :matchup_id, matchup.id %>
+
+          <!-- Team selection dropdown -->
+          <div>
+            <%= label_tag :predicted_winner_id, "Pick a winner" %><br>
+            <%= select_tag :predicted_winner_id,
+              options_for_select([
+                [matchup.team_a.name, matchup.team_a.id],
+                [matchup.team_b.name, matchup.team_b.id]
+              ], selected: prediction&.predicted_winner_id)
+            %>
+          </div>
+
+          <!-- Games in series -->
+          <div>
+            <%= label_tag :games_in_series, "How many games?" %><br>
+            <%= number_field_tag :games_in_series,
+              prediction&.games_in_series || 6,
+              in: 4..7
+            %>
+          </div>
+
+          <!-- Submit button -->
+          <div style="margin-top: 10px;">
+            <%= submit_tag prediction.present? ? "Update Prediction" : "Save Prediction" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

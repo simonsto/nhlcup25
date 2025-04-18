@@ -1,0 +1,24 @@
+<h1>📋 My Predictions</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Round</th>
+      <th>Matchup</th>
+      <th>Your Pick</th>
+      <th>Predicted Games</th>
+      <th>Score Awarded</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @predictions.each do |prediction| %>
+      <tr>
+        <td><%= prediction.matchup.round %></td>
+        <td><%= "#{prediction.matchup.team_a.name} vs #{prediction.matchup.team_b.name}" %></td>
+        <td><%= prediction.predicted_winner.name %></td>
+        <td><%= prediction.games_in_series %></td>
+        <td><%= prediction.score_awarded || "—" %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

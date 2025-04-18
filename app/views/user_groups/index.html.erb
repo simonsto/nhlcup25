@@ -1,0 +1,43 @@
+<h1>Team Leaderboard</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Group Name</th>
+      <th>Members</th>
+      <th>Total Score</th>
+      <th>Average Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @user_groups.each_with_index do |group, index| %>
+      <tr>
+        <td><%= index + 1 %></td>
+        <td><%= link_to group.name, user_group_path(group.slug) %></td>
+        <td><%= group.users.count %></td>
+        <td><%= group.total_score %></td>
+        <td><%= group.average_score %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>Join a Group</h2>
+
+<%= form_with url: join_user_group_path, method: :post, local: true do |f| %>
+  <div>
+    <%= f.label :invite_code, "Enter Invite Code or Group Name" %><br>
+    <%= f.text_field :invite_code, placeholder: "e.g., amazon23 or team-alpha" %>
+  </div>
+  <br>
+  <div>
+    <%= f.submit "Join Group" %>
+  </div>
+  <div>
+  <p>Want to lead your own group?</p>
+  <%= link_to "Create a Group", new_user_group_path %>
+  </div>
+<% end %>
